@@ -35,6 +35,7 @@ public final class LuaClosure {
 	}
 	
 	public String toString() {
-		return "function " + prototype.toString() + ":" + prototype.lines[0] + "[" + Integer.toString(hashCode(), 36) + "]";
+		String lineNum = prototype.lines.length > 0 ? Integer.toString(prototype.lines[0]) : "?";
+		return "function " + prototype.toString() + ":" + lineNum + "[" + Integer.toString(hashCode(), 36) + "]";
 	}
 }

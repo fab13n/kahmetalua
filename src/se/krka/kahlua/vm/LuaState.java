@@ -21,10 +21,13 @@ THE SOFTWARE.
 */
 package se.krka.kahlua.vm;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Random;
+
 import se.krka.kahlua.stdlib.BaseLib;
 import se.krka.kahlua.stdlib.CoroutineLib;
 import se.krka.kahlua.stdlib.MathLib;
@@ -276,6 +279,7 @@ public final class LuaState {
 					b = getBx(op);
 					Object value = callFrame.get(a);
 					Object key = prototype.constants[b];
+					log("\tSETGLOBAL "+key);
 
 					tableSet(closure.env, key, value);
 
@@ -300,6 +304,8 @@ public final class LuaState {
 					Object key = getRegisterOrConstant(callFrame, b);
 					Object value = getRegisterOrConstant(callFrame, c);
 
+					if (key instanceof String) log("\tSETTABLE ."+key);
+					
 					tableSet(aObj, key, value);
 
 					break;
@@ -1248,7 +1254,22 @@ public final class LuaState {
 
 	
 	public LuaClosure loadByteCodeFromResource(String name, LuaTable environment) {
-		InputStream stream = getClass().getResourceAsStream("/" + name + ".lbc");
+		// I have a problem with my class loader it seems
+		// InputStream stream = getClass().getResourceAsStream("/" + name + ".lbc");
+		
+		log("Loading " + name + " with loadByteCodeFromResource()");
+		
+		/* Change dots into path separators. */
+		byte separator = '\\'; // FIXME: make it posix-compliant
+		byte[] bytes = name.getBytes();
+		for (int i=0; i<bytes.length; i++) 
+			if(bytes[i] == '.') bytes[i] = separator;
+		name = new String(bytes);
+
+		// FIXME: temp hack to circumvent my class loader issue
+		InputStream stream = null;
+		try { stream = new FileInputStream("C:\\fabien\\src\\eclipse-workspaces\\main\\kahlua\\resources\\" + name + ".lbc"); }
+		catch (FileNotFoundException e1) { e1.printStackTrace(); }
 		if (stream == null) {
 			return null;
 		}
@@ -1257,6 +1278,10 @@ public final class LuaState {
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
+	}
+	
+	private void log(String s){
+		System.out.println(s);
 	}
 	
 }
