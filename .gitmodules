@@ -1,0 +1,3 @@
+[submodule "metalua"]
+	path = metalua
+	url = git://github.com/fab13n/metalua.git

@@ -1,0 +1,6 @@
+bin/
+resources/serialize.*
+resources/strict.*
+resources/verbose_require.*
+resources/metalua.lbc
+resources/metalua
