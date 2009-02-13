@@ -304,7 +304,13 @@ public final class LuaState {
 					Object key = getRegisterOrConstant(callFrame, b);
 					Object value = getRegisterOrConstant(callFrame, c);
 
-					if (key instanceof String) log("\tSETTABLE ."+key);
+					if (key instanceof String) {
+						if (value instanceof String) {
+							log("\tSETTABLE ." + key + " := " + value);
+						} else {
+							log("\tSETTABLE ." + key);
+						}
+					}
 					
 					tableSet(aObj, key, value);
 
@@ -1252,6 +1258,9 @@ public final class LuaState {
 		return b ? Boolean.TRUE : Boolean.FALSE;
 	}
 
+	public LuaClosure loadByteCodeFromResource(String name) {
+		return loadByteCodeFromResource(name, this.getEnvironment());
+	}
 	
 	public LuaClosure loadByteCodeFromResource(String name, LuaTable environment) {
 		// I have a problem with my class loader it seems
