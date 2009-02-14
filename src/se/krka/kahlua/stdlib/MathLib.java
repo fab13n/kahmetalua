@@ -126,6 +126,7 @@ public final class MathLib implements JavaFunction {
 	}
 
 	public int call(LuaCallFrame callFrame, int nArguments) {
+		if (LuaState.VERBOSE) System.out.println ("\tmath."+names[index]+"()");
 		switch (index) {
 		case ABS: return abs(callFrame, nArguments);
 		case ACOS: return acos(callFrame, nArguments);

@@ -122,6 +122,7 @@ public final class BaseLib implements JavaFunction {
 
 
 	public int call(LuaCallFrame callFrame, int nArguments) {
+		if (LuaState.VERBOSE) System.out.println ("\tbase."+names[index]+"()");
 		switch (index) {
 		case PCALL: return pcall(callFrame, nArguments);
 		case PRINT: return print(callFrame, nArguments);
