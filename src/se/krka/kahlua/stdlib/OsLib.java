@@ -75,7 +75,7 @@ public class OsLib implements JavaFunction {
 	private static final String YDAY = "yday";
 	//private static final String ISDST = "isdst";
 
-	private static TimeZone tzone = TimeZone.getTimeZone("UTC");
+	private static TimeZone tzone;// = TimeZone.getTimeZone("UTC"); //Doesn't work with J2SE?
 	
 	public static final int TIME_DIVIDEND = 1000; // number to divide by for converting from milliseconds.
 	private static final int MILLIS_PER_DAY = TIME_DIVIDEND * 60 * 60 * 24;
