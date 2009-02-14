@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Map;
 import java.util.Random;
 
 import se.krka.kahlua.stdlib.BaseLib;
@@ -35,6 +36,9 @@ import se.krka.kahlua.stdlib.OsLib;
 import se.krka.kahlua.stdlib.StringLib;
 
 public final class LuaState {
+	
+	public static boolean VERBOSE = false;
+	
 	private static final int FIELDS_PER_FLUSH = 50;
 	private static final int OP_MOVE = 0;
 	private static final int OP_LOADK = 1;
@@ -279,7 +283,7 @@ public final class LuaState {
 					b = getBx(op);
 					Object value = callFrame.get(a);
 					Object key = prototype.constants[b];
-					log("\tSETGLOBAL "+key);
+					if (VERBOSE) System.out.println ("\tSETGLOBAL "+key);
 
 					tableSet(closure.env, key, value);
 
@@ -304,11 +308,11 @@ public final class LuaState {
 					Object key = getRegisterOrConstant(callFrame, b);
 					Object value = getRegisterOrConstant(callFrame, c);
 
-					if (key instanceof String) {
+					if (VERBOSE && key instanceof String) {
 						if (value instanceof String) {
-							log("\tSETTABLE ." + key + " := " + value);
+							System.out.println("\tSETTABLE ." + key + " := " + value);
 						} else {
-							log("\tSETTABLE ." + key);
+							System.out.println("\tSETTABLE ." + key);
 						}
 					}
 					
@@ -1258,27 +1262,41 @@ public final class LuaState {
 		return b ? Boolean.TRUE : Boolean.FALSE;
 	}
 
+	public Object[] pcallByteCodeFromResource (String name, Object... args) {
+		LuaClosure f = loadByteCodeFromResource(name);
+		return pcall(f, args);
+	}
+
+	public Object callByteCodeFromResource (String name, Object... args) {
+		LuaClosure f = loadByteCodeFromResource(name);
+		return call(f, args);
+	}
+
 	public LuaClosure loadByteCodeFromResource(String name) {
 		return loadByteCodeFromResource(name, this.getEnvironment());
 	}
 	
 	public LuaClosure loadByteCodeFromResource(String name, LuaTable environment) {
-		// I have a problem with my class loader it seems
-		// InputStream stream = getClass().getResourceAsStream("/" + name + ".lbc");
+	
+		System.out.println("Loading resource " + name);
 		
-		log("Loading " + name + " with loadByteCodeFromResource()");
+		String separator = System.getProperty("file.separator");
 		
 		/* Change dots into path separators. */
-		byte separator = '\\'; // FIXME: make it posix-compliant
+		byte sepByte = separator.getBytes()[0];
 		byte[] bytes = name.getBytes();
 		for (int i=0; i<bytes.length; i++) 
-			if(bytes[i] == '.') bytes[i] = separator;
+			if(bytes[i] == '.') bytes[i] = sepByte;
 		name = new String(bytes);
+		
+	    InputStream stream = getClass().getResourceAsStream("/" + name + ".lbc");
 
-		// FIXME: temp hack to circumvent my class loader issue
-		InputStream stream = null;
-		try { stream = new FileInputStream("C:\\fabien\\src\\eclipse-workspaces\\main\\kahlua\\resources\\" + name + ".lbc"); }
-		catch (FileNotFoundException e1) { e1.printStackTrace(); }
+	    /* The resource loading mechanism doesn't work for me on J2SE. */
+		if (stream==null)
+			try { stream = new FileInputStream(
+					System.getProperty("user.dir") + separator + "resources" + separator + name + ".lbc"); }
+			catch (FileNotFoundException e1) { e1.printStackTrace(); }
+		
 		if (stream == null) {
 			return null;
 		}
@@ -1287,10 +1305,5 @@ public final class LuaState {
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
-	}
-	
-	private void log(String s){
-		System.out.println(s);
-	}
-	
+	}	
 }
